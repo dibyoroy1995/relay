@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Relay</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&family=Instrument+Serif:ital@1&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#050605;--panel:#0d0f0c;--line:rgba(255,255,255,.09);--text:#f2f4ee;--mute:#8b9086;--lime:#c4ff4d;--ink:#0a0c08;color-scheme:dark;
+--sans:Inter,system-ui,sans-serif;--mono:"JetBrains Mono",ui-monospace,monospace;--serif:"Instrument Serif",Georgia,serif;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#050605}}
+:root[data-theme="dark"]{--bg:#050605}
+*{box-sizing:border-box}html{scroll-padding-top:90px;scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font:400 15px/1.55 var(--sans);overflow-x:hidden}
+.aurora{position:fixed;inset:0;z-index:-1;overflow:hidden;background:var(--bg)}
+.aurora i{position:absolute;width:70vw;height:30vh;border-radius:50%;-webkit-mask-image:radial-gradient(closest-side,#000,transparent);mask-image:radial-gradient(closest-side,#000,transparent);will-change:transform;opacity:.55;transform:rotate(-35deg);animation:drift 18s ease-in-out infinite alternate}
+.aurora i:nth-child(1){background:#4f8a1c;left:-10%;top:10%}
+.aurora i:nth-child(2){background:#1f5f6b;left:30%;top:40%;animation-delay:-6s;opacity:.4}
+.aurora i:nth-child(3){background:#7bbf20;left:10%;top:70%;animation-delay:-11s;opacity:.35}
+#flow{position:absolute;inset:0;width:100%;height:100%}
+.w{display:inline-block;opacity:0;filter:blur(12px);transform:translateY(.35em);animation:wi .9s cubic-bezier(.2,.7,.2,1) forwards;animation-delay:calc(var(--i)*.12s + .2s)}
+@keyframes wi{to{opacity:1;filter:none;transform:none}}
+@keyframes fl{50%{transform:translateY(-10px) rotate(8deg)}}
+@keyframes pl{50%{opacity:.25}}
+.hero .mark{animation:fl 4.5s ease-in-out infinite}
+.status:before{animation:pl 2s ease-in-out infinite}
+.hero{will-change:transform}
+.rv{opacity:0;transform:translateY(30px);transition:opacity .9s ease,transform .9s cubic-bezier(.2,.7,.2,1)}
+.rv.in{opacity:1;transform:none}
+.meter i,.reg div i{transition:width 1.6s cubic-bezier(.2,.8,.2,1) .3s}
+.rv:not(.in) .meter i,.rv:not(.in) .reg i{width:0!important}
+.bar{transition:height 1.1s cubic-bezier(.2,.8,.2,1)}
+.bar:hover .f{filter:brightness(1.4)}
+.card{position:relative;overflow:hidden}
+.card:before{content:"";position:absolute;inset:0;background:radial-gradient(320px circle at var(--mx,50%) var(--my,50%),rgba(196,255,77,.11),transparent 60%);opacity:0;transition:opacity .3s;pointer-events:none}
+.card:hover:before{opacity:1}
+.btn.slide{position:relative;isolation:isolate;overflow:hidden;transition:color .4s}
+.btn.slide:before{content:"";position:absolute;z-index:-1;left:4px;top:4px;bottom:4px;width:34px;border-radius:99px;background:var(--ink);transition:width .55s cubic-bezier(.2,.8,.2,1)}
+.btn.slide:hover:before{width:calc(100% - 8px)}.btn.slide:hover{color:var(--text)}
+.cur{position:fixed;left:0;top:0;width:26px;height:26px;border:1.5px solid var(--lime);border-radius:50%;pointer-events:none;z-index:60;transition:background .25s,border-width .25s}
+.cur.hv{border-width:3px;background:rgba(196,255,77,.18)}
+@media (prefers-reduced-motion:reduce){.w,.rv{opacity:1;transform:none;filter:none;animation:none;transition:none}.hero .mark,.status:before{animation:none}}
+.sec,.cta,.grid{perspective:1200px}
+@keyframes drift{to{transform:rotate(-28deg) translate(6vw,-5vh)}}
+@media (prefers-reduced-motion:reduce){.aurora i{animation:none}html{scroll-behavior:auto}}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;display:flex;align-items:center;justify-content:space-between;padding:14px 5vw;background:rgba(5,6,5,.7);backdrop-filter:blur(14px)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:rgba(5,6,5,.7);backdrop-filter:blur(14px)}
+.logo{display:flex;align-items:center;gap:10px;font-weight:500;font-size:17px}
+.mark{width:26px;height:26px;border-radius:7px;background:var(--lime);color:var(--ink);display:grid;place-items:center;font-weight:600;font-size:14px}
+nav{display:flex;gap:32px;color:var(--mute);font-size:13px}nav a{color:inherit;text-decoration:none}nav a:hover{color:var(--text)}
+.right{display:flex;gap:12px;align-items:center}
+.status{font:12px var(--mono);border:1px solid var(--line);border-radius:99px;padding:7px 14px;display:flex;gap:8px;align-items:center}
+.status:before{content:"";width:6px;height:6px;border-radius:50%;background:var(--lime)}
+.btn{background:var(--lime);color:var(--ink);border:0;border-radius:99px;padding:10px 18px;font:500 13px var(--sans);cursor:pointer;text-decoration:none;display:inline-block;transition:transform .15s}
+.btn:hover{transform:translateY(-1px)}.btn:focus-visible,input:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.btn.ghost{background:rgba(255,255,255,.07);color:var(--text)}.btn.dark{background:var(--ink);color:var(--text)}
+main{padding:0 5vw;max-width:1280px;margin:auto}
+.hero{background:var(--lime);color:var(--ink);border-radius:26px;margin-top:20px;padding:12vh 6vw;text-align:center;min-height:62vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px}
+.hero small{font:12px var(--mono);opacity:.6}
+.hero h1{font:500 clamp(40px,7vw,92px)/1 var(--sans);letter-spacing:-.04em;margin:0;max-width:12ch}
+.hero h1 em{font:italic 400 1.05em var(--serif)}
+.hero .mark{width:64px;height:64px;border-radius:18px;background:var(--ink);color:var(--lime);font-size:30px}
+.tag{font:11px var(--mono);border:1px solid var(--line);border-radius:99px;padding:4px 10px;display:inline-flex;gap:6px;align-items:center;color:var(--mute)}
+.tag:before{content:"";width:5px;height:5px;border-radius:50%;background:var(--lime)}
+.sec{padding:110px 0 0}
+.head{display:flex;justify-content:space-between;align-items:flex-end;gap:40px;flex-wrap:wrap;margin:18px 0 36px}
+.head h2{font:500 clamp(28px,4vw,48px)/1.08 var(--sans);letter-spacing:-.03em;margin:0;max-width:18ch}
+.head h2 em{font:italic 400 1.1em var(--serif)}
+.head p{color:var(--mute);max-width:36ch;margin:0}
+.grid{display:grid;gap:16px}.g2{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}.g3{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.card{background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.015));border:1px solid var(--line);border-radius:22px;padding:26px;backdrop-filter:blur(10px)}
+.card h3{font:500 19px var(--sans);margin:0 0 8px;letter-spacing:-.01em}.card p{color:var(--mute);margin:0 0 20px;font-size:14px}
+.lbl{font:12px var(--mono);color:var(--mute)}
+.rt{display:flex;align-items:center;justify-content:center;height:150px;position:relative}
+.rt:before{content:"";position:absolute;left:12%;right:12%;top:50%;height:1px;background:linear-gradient(90deg,transparent,var(--lime),transparent)}
+.rt .mark{width:60px;height:60px;border-radius:16px;font-size:26px;position:relative;box-shadow:0 0 50px rgba(196,255,77,.35)}
+.rt span{position:absolute;font:11px var(--mono);color:var(--mute);border:1px solid var(--line);border-radius:50%;width:34px;height:34px;display:grid;place-items:center;background:var(--panel)}
+.reg{display:flex;align-items:center;gap:14px;margin:16px 0;font:12px var(--mono);color:var(--mute)}.reg b{font-weight:400;width:110px;color:var(--text)}
+.reg div{flex:1;height:6px;background:rgba(255,255,255,.08);border-radius:9px;overflow:hidden}.reg div i{display:block;height:100%;background:var(--lime);border-radius:9px}
+.rec{display:grid;grid-template-columns:minmax(220px,1fr) 2fr;gap:30px;align-items:center}
+.rec h3{font:500 24px var(--sans);letter-spacing:-.02em;margin:0 0 10px}.rec p{color:var(--mute);margin:0}
+.chart{display:flex;align-items:flex-end;justify-content:space-around;height:240px;border-bottom:1px solid var(--line);padding:0 10px 0}
+.bar{width:58px;position:relative;margin-bottom:0}
+.bar .f,.bar .s,.bar .t{position:absolute}
+.bar .f{left:0;bottom:0;width:100%;height:100%;background:linear-gradient(160deg,#2c2e2a,#141513);border-radius:2px;transition:height .6s}
+.bar .s{left:100%;bottom:0;width:24px;height:100%;background:#0b0c0a;transform-origin:left bottom;transform:skewY(-40deg)}
+.bar .t{left:0;bottom:100%;width:58px;height:24px;background:#555752;transform-origin:left bottom;transform:skewX(-50deg) translateX(12px)}
+.bar.hot .t{background:var(--lime)}
+.days{display:flex;justify-content:space-around;padding-top:16px;font:12px var(--mono);color:var(--mute)}.days .on{color:var(--lime)}
+.stats .big{font:500 clamp(40px,5vw,60px)/1 var(--sans);letter-spacing:-.04em;margin:8px 0 6px}
+.stats .big.g{color:var(--lime)}
+.meter{height:8px;background:rgba(255,255,255,.08);border-radius:9px;margin:14px 0}.meter i{display:block;height:100%;background:var(--lime);border-radius:9px}
+.quote{color:var(--text);font-size:14px;margin:30px 0 14px}.who{font:12px var(--mono);color:var(--mute)}
+.est{padding:28px}.est input[type=range]{width:100%;accent-color:var(--lime);margin:20px 0 8px}
+.est .row{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap}
+.price{font:500 40px var(--sans);letter-spacing:-.03em;margin:10px 0 2px}.price small{font:12px var(--mono);color:var(--mute);letter-spacing:0}
+.plan ul{list-style:none;padding:0;margin:20px 0 26px;display:grid;gap:10px;color:var(--mute);font-size:14px}
+.plan li:before{content:"✓";color:var(--lime);margin-right:10px}
+.plan .btn{display:block;text-align:center;width:100%}
+.plan.pick{border-color:rgba(196,255,77,.5);box-shadow:0 0 60px rgba(196,255,77,.1)}
+.badge{float:right;background:var(--lime);color:var(--ink);font:11px var(--mono);padding:3px 9px;border-radius:6px}
+.cta{display:grid;grid-template-columns:1fr 1.4fr;gap:16px;margin-top:100px}
+.cta .a{min-height:300px;display:flex;flex-direction:column;justify-content:space-between}
+.cta .b{background:var(--lime);color:var(--ink);border-radius:26px;padding:34px}
+.cta h2{font:500 clamp(26px,3.4vw,40px)/1.1 var(--sans);letter-spacing:-.03em;margin:10px 0 14px}.cta h2 em{font:italic 400 1.1em var(--serif)}
+.cta .b p{max-width:42ch;margin:0 0 26px}
+.mail{display:flex;background:#fff;border-radius:99px;padding:6px}.mail input{flex:1;border:0;background:none;padding:0 18px;font:14px var(--sans);min-width:0;color:var(--ink)}
+footer{padding:60px 0 40px;display:flex;justify-content:space-between;gap:40px;flex-wrap:wrap;color:var(--mute);font-size:13px}
+footer h4{font:12px var(--mono);margin:0 0 12px;color:var(--text);font-weight:400}footer a{display:block;color:inherit;text-decoration:none;margin:6px 0}
+.cols{display:flex;gap:60px;flex-wrap:wrap}
+@media (max-width:760px){nav{display:none}.status{display:none}.cta,.rec{grid-template-columns:1fr}.bar{width:36px}.bar .t{width:36px}.bar .s{width:16px}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/motion@11.11.13/dist/motion.js"></script>
+</head>
+<body>
+<div class="aurora" aria-hidden="true"><i></i><i></i><i></i><canvas id="flow"></canvas></div>
+<header>
+  <div class="logo"><span class="mark">»</span>Relay</div>
+  <nav><a href="#product">Product</a><a href="#how">How it works</a><a href="#customers">Customers</a><a href="#pricing">Pricing</a></nav>
+  <div class="right"><span class="status">all systems normal</span><a class="btn" href="#join">Start free</a></div>
+</header>
+<main>
+  <section class="hero" id="product">
+    <small>what we are as</small>
+    <h1><span class="w" style="--i:0">The</span> <span class="w" style="--i:1">best</span> <em class="w" style="--i:2">workflow</em> <span class="w" style="--i:3">is</span> <span class="w" style="--i:4">the</span> <span class="w" style="--i:5">one</span> <span class="w" style="--i:6">you</span> <span class="w" style="--i:7">forget</span></h1>
+    <span class="mark">»</span>
+  </section>
+
+  <section class="sec" id="how">
+    <span class="tag">reliability</span>
+    <div class="head"><h2><em>Boring</em> in the ways that matter.</h2><p>Credentials, retries, rate limits, residency. The parts nobody demos, and the parts that decide the year.</p></div>
+    <div class="grid g2">
+      <div class="card"><h3>One runtime, every app</h3><p>Relay holds the credentials, retries and rate limits, so a step behaves the same on Stripe or on the API you wrote last week.</p>
+        <div class="rt"><span style="left:10%">SL</span><span style="left:26%;top:12%">ST</span><div class="mark">»</div><span style="right:26%;top:12%">PG</span><span style="right:10%">HS</span></div>
+        <div class="lbl">credentials, retries, rate limits, residency</div></div>
+      <div class="card"><h3>Runs where your data lives</h3><p>Pick Frankfurt, Virginia or Sydney. Payloads and logs stay in the region you choose, and the audit trail says so in writing.</p>
+        <div class="lbl">where runs executed, last 24 hours</div>
+        <div class="reg"><b>eu-central-1</b><div><i style="width:46%"></i></div>46%</div>
+        <div class="reg"><b>us-east-1</b><div><i style="width:38%;background:#aaa"></i></div>38%</div>
+        <div class="reg"><b>ap-southeast-2</b><div><i style="width:16%;background:#aaa"></i></div>16%</div>
+        <div class="lbl">a payload never leaves</div></div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="card rec">
+      <div><span class="lbl">02</span><h3 style="margin-top:14px">Every run is on the record</h3><p>Inputs, outputs and timings for 90 days. Replay any run before you trust it with money.</p></div>
+      <div><div class="lbl" style="margin-bottom:30px">runs per weekday &nbsp;&nbsp; 62,000 average</div>
+        <div class="chart" id="chart"></div>
+        <div class="days"><span>mon</span><span>tue</span><span>wed</span><span>thu</span><span>fri</span><span class="on">sat</span></div></div>
+    </div>
+  </section>
+
+  <section class="sec" id="customers">
+    <span class="tag">case studies</span>
+    <div class="head"><h2>Numbers we did <em>not</em> have to explain away.</h2><p>Counted across every account, including the ones that churned. An honest average, not a best case.</p></div>
+    <div class="grid g3 stats">
+      <div><div class="lbl">runs</div><div class="big g" data-to="54227">54,227</div><div class="lbl">runs on an average weekday</div>
+        <p class="quote">We killed four scripts nobody wanted to own and a spreadsheet that had been lying to us.</p><div class="who">Marta Silvani<br>Head of operations, Fieldly</div></div>
+      <div><div class="lbl">time back</div><div class="big" data-to="9">9</div><div class="lbl">hours a week given back per person</div>
+        <p class="quote">Finance stopped asking me for the weekly export. It just lands in the channel now.</p><div class="who">Owen Brandt<br>Data lead, Cassette</div></div>
+      <div><div class="lbl">first attempt</div><div class="big" data-to="66" data-suf="%">66%</div><div class="lbl">of runs finish on the first attempt</div><div class="meter"><i style="width:66%"></i></div>
+        <p class="quote">What sold my team was the log. When something breaks we see the exact payload.</p><div class="who">Tom Eikelund<br>VP, Bright Coast</div></div>
+    </div>
+  </section>
+
+  <section class="sec" id="pricing">
+    <span class="tag">pricing</span>
+    <div class="head"><h2>You pay for <em>runs</em>, not seats.</h2><p>Every plan includes the full audit log and your choice of region.</p></div>
+    <div class="card est"><div class="lbl">estimate</div><h3 style="margin-top:6px">How many runs do you expect a month?</h3>
+      <input id="rng" type="range" min="1000" max="300000" step="1000" value="30000" aria-label="Runs per month">
+      <div class="row"><span class="lbl">1,000</span><b id="cnt" class="lbl" style="color:var(--text)">30,000</b><span class="lbl">300,000</span></div>
+      <div class="row" style="margin-top:20px"><div><div class="lbl">your plan</div><div class="price" id="pn">Team <small>$89 / month</small></div></div><a class="btn" href="#join">Start free</a></div></div>
+    <div class="grid g3" style="margin-top:16px">
+      <div class="card plan"><div class="lbl">Starter</div><div class="price">$29 <small>/ month</small></div><ul><li>3,000 runs a month</li><li>10 workflows</li><li>7 days of run history</li><li>Email support</li></ul><a class="btn ghost" href="#join">Start free</a></div>
+      <div class="card plan pick"><span class="badge">most picked</span><div class="lbl">Team</div><div class="price">$89 <small>/ month</small></div><ul><li>30,000 runs a month</li><li>Unlimited workflows</li><li>90 days of run history</li><li>Slack approvals and code steps</li></ul><a class="btn slide" href="#join">Start free</a></div>
+      <div class="card plan"><div class="lbl">Scale</div><div class="price">$290 <small>/ month</small></div><ul><li>300,000 runs a month</li><li>Single sign-on and audit log</li><li>1 year of run history</li><li>Named engineer, 4 hour response</li></ul><a class="btn ghost" href="#join">Talk to us</a></div>
+    </div>
+  </section>
+
+  <section class="cta" id="join">
+    <div class="card a"><div class="logo"><span class="mark">»</span>Relay</div><p style="font-size:17px;color:var(--text);max-width:22ch">Automation for the work that lives between your tools.</p></div>
+    <div class="b"><span class="lbl" style="color:var(--ink);opacity:.6">what now</span><h2>Pick the task you <em>hate</em> most.</h2>
+      <p>Bring one job nobody enjoys doing by hand. If Relay can’t run it by the end of the trial, we’ll tell you so.</p>
+      <div class="mail"><input type="email" placeholder="Work email" aria-label="Work email"><button class="btn dark">Start free</button></div></div>
+  </section>
+
+  <footer>
+    <div>Relay Labs<br>Independent, profitable, and boring on purpose<br>since 2024.</div>
+    <div class="cols">
+      <div><h4>product</h4><a href="#">Canvas</a><a href="#">Apps</a><a href="#">Run history</a><a href="#">Pricing</a></div>
+      <div><h4>learn</h4><a href="#">Docs</a><a href="#">Templates</a><a href="#">Changelog</a><a href="#">Status</a></div>
+      <div><h4>company</h4><a href="#">About</a><a href="#">Careers</a><a href="#">Security</a><a href="#">Contact</a></div>
+      <div><h4>legal</h4><a href="#">Privacy</a><a href="#">Terms</a><a href="#">Cookies</a></div>
+    </div>
+  </footer>
+</main>
+<script>
+(function(){
+var cv=document.getElementById('flow'),x=cv.getContext('2d'),W,H,D,T=0,rm=matchMedia('(prefers-reduced-motion:reduce)').matches,L=[];
+for(var i=0;i<54;i++)L.push({o:i/54,p:Math.random()*6.28,a:18+Math.random()*50,f:.7+Math.random()*1.3,w:.5+Math.random()*1.1,
+c:i%6==0?'120,205,255':i%5==0?'70,175,190':'196,255,77'});
+function rs(){D=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*D;cv.height=H*D;x.setTransform(D,0,0,D,0,0)}
+function dr(){x.clearRect(0,0,W,H);x.globalCompositeOperation='lighter';
+var m=document.documentElement.scrollHeight-H,sc=m>0?scrollY/m:0,cy=H*(.18+.62*sc);
+L.forEach(function(l){x.beginPath();
+for(var k=0;k<=40;k++){var u=k/40,px=u*W*1.2-W*.1,
+py=cy+(u-.5)*H*.5+(l.o-.5)*170*(.45+.55*Math.sin(u*2.6+l.p+T*.4))+Math.sin(u*l.f*4+T+l.p)*l.a;
+k?x.lineTo(px,py):x.moveTo(px,py)}
+x.strokeStyle='rgba('+l.c+','+(.18+.3*l.o*(1-l.o)*4)+')';x.lineWidth=l.w*1.4;x.stroke()})}
+function lp(){T+=.007;dr();requestAnimationFrame(lp)}
+rs();addEventListener('resize',function(){rs();dr()});
+if(rm){dr();addEventListener('scroll',dr,{passive:true})}else lp();
+var h=[90,110,150,190,100,0],c=document.getElementById('chart');
+h.forEach(function(v,i){var b=document.createElement('div');b.className='bar'+(i<3?' hot':'');b.dataset.h=v;b.style.height=rm?v+'px':'0px';
+b.innerHTML='<div class="f"></div><div class="s"></div><div class="t"></div>';if(!v)b.style.visibility='hidden';c.appendChild(b)});
+var r=document.getElementById('rng'),n=document.getElementById('cnt'),p=document.getElementById('pn');
+function u(){var v=+r.value,t=v<=3000?['Starter','$29']:v<=30000?['Team','$89']:['Scale','$290'];
+n.textContent=v.toLocaleString('en-US');p.innerHTML=t[0]+' <small>'+t[1]+' / month</small>'}
+r.addEventListener('input',u);u();
+var fine=matchMedia('(pointer:fine)').matches;
+if(!rm&&fine){document.documentElement.style.scrollBehavior='auto';
+var sc0=scrollY,tg=scrollY,on=false;
+function lim(){return document.documentElement.scrollHeight-innerHeight}
+function clampT(v){return Math.max(0,Math.min(lim(),v))}
+function tick(){sc0+=(tg-sc0)*.085;if(Math.abs(tg-sc0)<.3){sc0=tg;on=false}scrollTo({top:sc0,behavior:'instant'});if(on)requestAnimationFrame(tick)}
+function go(){if(!on){on=true;requestAnimationFrame(tick)}}
+addEventListener('wheel',function(e){if(e.ctrlKey)return;e.preventDefault();tg=clampT(tg+(e.deltaMode===1?e.deltaY*32:e.deltaY));go()},{passive:false});
+addEventListener('scroll',function(){if(!on){sc0=tg=scrollY}},{passive:true});
+document.querySelectorAll('a[href^="#"]').forEach(function(a){a.addEventListener('click',function(e){var el=document.querySelector(a.getAttribute('href'));if(!el)return;e.preventDefault();tg=clampT(el.getBoundingClientRect().top+scrollY-80);go()})});
+addEventListener('keydown',function(e){if(/INPUT|TEXTAREA|SELECT|BUTTON/.test(document.activeElement.tagName))return;var v=innerHeight*.9,k={ArrowDown:60,ArrowUp:-60,PageDown:v,PageUp:-v,' ':e.shiftKey?-v:v,Home:-1e9,End:1e9}[e.key];if(k===undefined)return;e.preventDefault();tg=clampT(tg+k);go()})}
+function cu(el){var to=+el.dataset.to,s=el.dataset.suf||'',t0=performance.now();(function f(n){var p=Math.min((n-t0)/1600,1),e=1-Math.pow(1-p,3);el.textContent=Math.round(to*e).toLocaleString('en-US')+s;if(p<1)requestAnimationFrame(f)})(t0)}
+if(!rm&&!window.Motion){
+var io=new IntersectionObserver(function(es){es.forEach(function(e){if(!e.isIntersecting)return;var t=e.target;t.classList.add('in');io.unobserve(t);
+if(t===c)[].forEach.call(c.children,function(b,i){setTimeout(function(){b.style.height=b.dataset.h+'px'},i*120)});
+t.querySelectorAll('[data-to]').forEach(cu)})},{threshold:.2});
+document.querySelectorAll('.head,.card,.stats>div,.cta>*').forEach(function(el){el.classList.add('rv');el.style.transitionDelay=([].indexOf.call(el.parentNode.children,el)*.1)+'s';io.observe(el)});
+document.querySelectorAll('[data-to]').forEach(function(el){el.textContent='0'+(el.dataset.suf||'')});
+io.observe(c);
+var hero=document.querySelector('.hero');
+addEventListener('scroll',function(){var p=Math.min(scrollY/(H*.9),1);hero.style.transform='scale('+(1-.07*p)+')';hero.style.borderRadius=(26+22*p)+'px';hero.style.opacity=1-.35*p},{passive:true});
+}
+if(fine&&!rm){var cr=document.createElement('div');cr.className='cur';document.body.appendChild(cr);var mx=-60,my=-60,qx=-60,qy=-60;
+addEventListener('mousemove',function(e){mx=e.clientX;my=e.clientY;cr.classList.toggle('hv',!!e.target.closest('a,button,input'));var cd=e.target.closest('.card');if(cd){var b2=cd.getBoundingClientRect();cd.style.setProperty('--mx',(e.clientX-b2.left)+'px');cd.style.setProperty('--my',(e.clientY-b2.top)+'px')}});
+(function f(){qx+=(mx-qx)*.2;qy+=(my-qy)*.2;cr.style.transform='translate('+(qx-13)+'px,'+(qy-13)+'px)';requestAnimationFrame(f)})()}
+})();
+</script>
+<script>
+(function(){
+var M=window.Motion;if(!M||!M.animate||!M.inView||matchMedia('(prefers-reduced-motion:reduce)').matches)return;
+var A=M.animate,V=M.inView,S=M.scroll,st=M.stagger,E=[.2,.7,.2,1];
+function sp(s,d){return{type:'spring',stiffness:s,damping:d}}
+function $(q,r){return[].slice.call((r||document).querySelectorAll(q))}
+function t(f){try{f()}catch(e){}}
+/* entrance: every tile, then its contents */
+$('.head,.card,.stats>div,.cta .b').forEach(function(el){
+var d=[].indexOf.call(el.parentNode.children,el)*.1,kids=[].slice.call(el.children),lis=$('li',el);
+el.style.opacity=0;kids.concat(lis).forEach(function(k){k.style.opacity=0});
+V(el,function(){
+A(el,{opacity:[0,1],y:[50,0],scale:[.96,1]},{duration:.9,delay:d,ease:E});
+if(kids.length)A(kids,{opacity:[0,1],y:[20,0]},{duration:.7,delay:st(.08,{startDelay:.2+d}),ease:E});
+if(lis.length)A(lis,{opacity:[0,1],x:[-14,0]},{duration:.5,delay:st(.07,{startDelay:.55+d}),ease:E});
+},{amount:.2})});
+/* hover tilt, lift and press on tiles */
+if(matchMedia('(pointer:fine)').matches)$('.card,.stats>div,.cta .b').forEach(function(el){
+var h=sp(260,18);
+el.addEventListener('pointerenter',function(){A(el,{scale:1.015,y:-4},h)});
+el.addEventListener('pointermove',function(e){var b=el.getBoundingClientRect();A(el,{rotateY:((e.clientX-b.left)/b.width-.5)*5,rotateX:-((e.clientY-b.top)/b.height-.5)*5},{duration:.25})});
+el.addEventListener('pointerleave',function(){A(el,{scale:1,y:0,rotateX:0,rotateY:0},h)});
+el.addEventListener('pointerdown',function(){A(el,{scale:.985},{duration:.12})});
+el.addEventListener('pointerup',function(){A(el,{scale:1.015},h)})});
+/* counters */
+$('[data-to]').forEach(function(el){var to=+el.dataset.to,s=el.dataset.suf||'';el.textContent='0'+s;
+V(el,function(){A(0,to,{duration:1.8,ease:E,onUpdate:function(v){el.textContent=Math.round(v).toLocaleString('en-US')+s}})},{amount:.6})});
+/* fills */
+$('.meter i,.reg div i').forEach(function(i){var w=i.style.width;i.style.transition='none';i.style.width='0%';
+V(i.parentNode,function(){A(i,{width:['0%',w]},{duration:1.4,ease:E})},{amount:.5})});
+/* chart bars */
+var ch=document.getElementById('chart');
+[].slice.call(ch.children).forEach(function(b){b.style.transition='none'});
+V(ch,function(){[].slice.call(ch.children).forEach(function(b,i){if(+b.dataset.h)A(b,{height:['0px',b.dataset.h+'px']},{type:'spring',stiffness:110,damping:13,delay:i*.1})})},{amount:.5});
+/* looping motion inside tiles */
+t(function(){A($('.rt .mark')[0],{scale:[1,1.12,1]},{duration:2.4,repeat:Infinity,ease:'easeInOut'})});
+t(function(){$('.rt span').forEach(function(s,i){A(s,{y:[0,-7,0]},{duration:3,delay:i*.4,repeat:Infinity,ease:'easeInOut'})})});
+t(function(){A($('.badge')[0],{rotate:[0,-5,5,0]},{duration:.7,repeat:Infinity,repeatDelay:3})});
+/* hero */
+t(function(){var hero=$('.hero')[0],hm=$('.hero .mark')[0];hm.style.animation='none';
+A(hm,{y:[0,-10,0],rotate:[0,8,0]},{duration:4.5,repeat:Infinity,ease:'easeInOut'});
+S(A(hero,{scale:[1,.93],opacity:[1,.6]}),{target:hero,offset:['start start','end start']})});
+/* price pulse */
+t(function(){var pn=document.getElementById('pn');pn.style.transformOrigin='left center';
+document.getElementById('rng').addEventListener('input',function(){A(pn,{scale:[1.08,1]},{duration:.3})})});
+})();
+</script>
+</body>
+</html>
